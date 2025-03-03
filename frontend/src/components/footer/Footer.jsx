@@ -1,7 +1,7 @@
 const Footer = () => {
     return ( 
         <footer style={styles} >
-            Copyright 2022 &copy;
+           developed by Taimoor
         </footer>
     );
 }
