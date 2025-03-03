@@ -18,7 +18,11 @@ const app = express();
 app.use(express.json());
 
 // Security Headers (helmet)
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false
+  })
+);
 
 // Prevent Http Param Pollution
 app.use(hpp());
@@ -27,15 +31,22 @@ app.use(hpp());
 app.use(xss());
 
 // Rate Limiting
-app.use(rateLimiting({
-  windowMs: 10 * 60 * 1000, // 10 minutes
-  max:200,
-}));
+app.use(
+  rateLimiting({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: process.env.NODE_ENV === 'production' ? 100 : 200,
+    message: "Too many requests from this IP, please try again later"
+  })
+);
 
-// Cors Policy
-app.use(cors({
-  origin: "http://localhost:3000"
-}));
+// CORS Policy
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+  })
+);
 
 // Routes
 app.use("/api/auth", require("./routes/authRoute"));
@@ -43,7 +54,12 @@ app.use("/api/users", require("./routes/usersRoute"));
 app.use("/api/posts", require("./routes/postsRoute"));
 app.use("/api/comments", require("./routes/commentsRoute"));
 app.use("/api/categories", require("./routes/categoriesRoute"));
-app.use("/api/password",require("./routes/passwordRoute"));
+app.use("/api/password", require("./routes/passwordRoute"));
+
+// Health Check Endpoint
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ status: "OK", timestamp: new Date() });
+});
 
 // Error Handler Middleware
 app.use(notFound);
@@ -53,6 +69,6 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () =>
   console.log(
-    `Server is running in ${process.env.NODE_ENV} mode on port ${PORT}`
+    `Server is running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`
   )
 );
