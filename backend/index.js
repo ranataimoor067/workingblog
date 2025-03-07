@@ -39,12 +39,27 @@ app.use(
   })
 );
 
-// CORS Policy
+// Allow requests from both localhost and your production frontend URL
+const allowedOrigins = [
+  "http://localhost:3000", // For development
+  "https://workingblog-frontend.vercel.app", // For production
+];
+
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://workingblog-frontend.vercel.app"], // Add all allowed origins
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"]
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg = `The CORS policy for this site does not allow access from the specified origin: ${origin}`;
+        return callback(new Error(msg), false);
+      }
+
+      return callback(null, true);
+    },
+    methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
+    credentials: true, // Allow cookies and authentication headers
   })
 );
 // Root route
