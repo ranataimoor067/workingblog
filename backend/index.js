@@ -48,6 +48,11 @@ app.use(
   })
 );
 
+// Root route
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "Welcome to the API!" });
+});
+
 // Routes
 app.use("/api/auth", require("./routes/authRoute"));
 app.use("/api/users", require("./routes/usersRoute"));
