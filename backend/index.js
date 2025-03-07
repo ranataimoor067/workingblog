@@ -42,12 +42,11 @@ app.use(
 // CORS Policy
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: ["http://localhost:3000", "https://workingblog-frontend.vercel.app"], // Add all allowed origins
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"]
   })
 );
-
 // Root route
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Welcome to the API!" });
